@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timbre Digital</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f5f0;
+      min-height: 100dvh;
+      display: flex; align-items: flex-start; justify-content: center;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .wrap {
+      width: 100%; max-width: 400px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-top: 1rem;
+    }
+    .header .bell-icon {
+      font-size: 52px;
+      color: #1D9E75;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    .header h1 {
+      font-size: 22px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+    .header p {
+      font-size: 14px;
+      color: #888;
+      margin-top: 4px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 1.5rem;
+      border: 1px solid #e5e5e0;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .step-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 10px;
+    }
+
+    select {
+      width: 100%;
+      padding: 14px 42px 14px 16px;
+      font-size: 16px;
+      border: 1.5px solid #e0e0da;
+      border-radius: 12px;
+      background-color: #fafaf8;
+      color: #1a1a1a;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    select:focus {
+      outline: none;
+      border-color: #1D9E75;
+    }
+
+    .depto-pill {
+      display: inline-block;
+      background: #E1F5EE;
+      color: #0F6E56;
+      border-radius: 20px;
+      padding: 5px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      margin-top: 10px;
+      min-height: 28px;
+      transition: opacity 0.2s;
+    }
+    .depto-pill.empty { opacity: 0; pointer-events: none; }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #f0f0ea;
+    }
+
+    .ring-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .ring-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .ring-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .ring-circle {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: #1D9E75;
+      border: 5px solid #0F6E56;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: transform 0.15s, background 0.15s;
+      box-shadow: 0 0 0 0 rgba(29,158,117,0.4);
+    }
+    .ring-btn:not(:disabled):active .ring-circle {
+      transform: scale(0.93);
+      background: #0F6E56;
+    }
+    .ring-btn:not(:disabled) .ring-circle:hover {
+      background: #19b882;
+    }
+    .ring-circle i { font-size: 54px; color: #fff; }
+    .ring-circle span {
+      font-size: 12px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.85);
+      letter-spacing: 0.1em;
+    }
+
+    .ring-hint {
+      font-size: 13px;
+      color: #aaa;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #fff;
+      border: 1px solid #e5e5e0;
+      border-radius: 16px;
+      padding: 16px 24px;
+      min-width: 260px;
+      text-align: center;
+      font-size: 15px;
+      color: #1a1a1a;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      opacity: 0;
+      z-index: 100;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.10);
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    .toast .t-icon { font-size: 24px; margin-bottom: 4px; display: block; }
+    .toast.success .t-icon { color: #1D9E75; }
+    .toast.error .t-icon { color: #D85A30; }
+    .toast small { display: block; font-size: 13px; color: #888; margin-top: 3px; }
+
+    .footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 12px;
+      color: #bbb;
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="header">
+    <i class="ti ti-bell bell-icon" aria-hidden="true"></i>
+    <h1>Timbre digital</h1>
+    <p>Edificio Las Acacias</p>
+  </div>
+
+  <div class="card">
+
+    <!-- Paso 1: elegir departamento -->
+    <div>
+      <p class="step-label">1 — ¿A quién buscás?</p>
+      <select id="depto" onchange="onDeptoChange()">
+        <option value="">Seleccioná un departamento</option>
+        <option value="casera">🏠 Casera / Encargada</option>
+        <option value="1A">Departamento 1A</option>
+        <option value="1B">Departamento 1B</option>
+        <option value="1C">Departamento 1C</option>
+        <option value="2A">Departamento 2A</option>
+        <option value="2B">Departamento 2B</option>
+        <option value="2C">Departamento 2C</option>
+        <option value="3A">Departamento 3A</option>
+        <option value="3B">Departamento 3B</option>
+        <option value="3C">Departamento 3C</option>
+        <option value="3D">Departamento 3D</option>
+      </select>
+      <div style="text-align:center; min-height: 32px;">
+        <span class="depto-pill empty" id="depto-pill">—</span>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Paso 2: timbrar -->
+    <div class="ring-section">
+      <p class="step-label">2 — Tocá el timbre</p>
+      <button class="ring-btn" id="ring-btn" disabled onclick="tocarTimbre()" aria-label="Tocar timbre">
+        <div class="ring-circle">
+          <i class="ti ti-bell" aria-hidden="true"></i>
+          <span>TIMBRAR</span>
+        </div>
+      </button>
+      <p class="ring-hint" id="hint">Primero elegí un departamento</p>
+    </div>
+
+  </div>
+
+  <p class="footer">Abrí la puerta, está alguien esperando 🙂</p>
+</div>
+
+<!-- Toast de confirmación -->
+<div class="toast" id="toast" role="alert" aria-live="polite">
+  <i class="ti t-icon" id="toast-icon" aria-hidden="true"></i>
+  <span id="toast-msg"></span>
+  <small id="toast-sub"></small>
+</div>
+
+<script>
+  // ============================================================
+  // CONFIGURACIÓN — completá estos datos cuando tengas el bot
+  // ============================================================
+  const TELEGRAM_BOT_TOKEN = 'TU_BOT_TOKEN_ACÁ';
+
+  // Chat ID de cada departamento (obtenés cada uno con @userinfobot)
+  const CHAT_IDS = {
+    'casera': 'CHAT_ID_CASERA',
+    '1A':     'CHAT_ID_1A',
+    '1B':     'CHAT_ID_1B',
+    '1C':     'CHAT_ID_1C',
+    '2A':     'CHAT_ID_2A',
+    '2B':     'CHAT_ID_2B',
+    '2C':     'CHAT_ID_2C',
+    '3A':     'CHAT_ID_3A',
+    '3B':     'CHAT_ID_3B',
+    '3C':     'CHAT_ID_3C',
+    '3D':     'CHAT_ID_3D',
+  };
+  // ============================================================
+
+  let cooldown = false;
+
+  function onDeptoChange() {
+    const sel = document.getElementById('depto');
+    const btn = document.getElementById('ring-btn');
+    const pill = document.getElementById('depto-pill');
+    const hint = document.getElementById('hint');
+    const val = sel.value;
+
+    if (val) {
+      btn.disabled = false;
+      pill.classList.remove('empty');
+      pill.textContent = sel.options[sel.selectedIndex].text;
+      hint.textContent = '¡Listo! Apretá el botón';
+    } else {
+      btn.disabled = true;
+      pill.classList.add('empty');
+      hint.textContent = 'Primero elegí un departamento';
+    }
+  }
+
+  async function tocarTimbre() {
+    if (cooldown) return;
+    const sel = document.getElementById('depto');
+    const depto = sel.value;
+    if (!depto) return;
+
+    const nombre = sel.options[sel.selectedIndex].text;
+    cooldown = true;
+    document.getElementById('ring-btn').disabled = true;
+    document.getElementById('hint').textContent = 'Enviando...';
+
+    const chatId = CHAT_IDS[depto];
+    const hora = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+    const mensaje = `🔔 *¡Hay alguien en la puerta!*\n\n📍 *${nombre}*\n🕐 ${hora}`;
+
+    try {
+      const res = await fetch(
+        `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: mensaje,
+            parse_mode: 'Markdown'
+          })
+        }
+      );
+      const data = await res.json();
+
+      if (data.ok) {
+        showToast('success', 'ti-check', '¡Timbre enviado!', `Avisamos a ${nombre}`);
+        document.getElementById('hint').textContent = 'Notificación enviada ✓';
+      } else {
+        showToast('error', 'ti-alert-triangle', 'No se pudo enviar', data.description || 'Revisá el token/chat ID');
+        document.getElementById('hint').textContent = 'Error al enviar';
+      }
+    } catch (e) {
+      showToast('error', 'ti-wifi-off', 'Sin conexión', 'Verificá tu internet');
+      document.getElementById('hint').textContent = 'Sin conexión';
+    }
+
+    // Cooldown de 8 segundos para evitar spam
+    setTimeout(() => {
+      cooldown = false;
+      document.getElementById('ring-btn').disabled = false;
+      document.getElementById('hint').textContent = '¡Listo! Podés timbrar de nuevo';
+    }, 8000);
+  }
+
+  function showToast(type, icon, msg, sub) {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-icon').className = 'ti ' + icon + ' t-icon';
+    document.getElementById('toast-msg').textContent = msg;
+    document.getElementById('toast-sub').textContent = sub;
+    t.className = 'toast ' + type;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 4000);
+  }
+</script>
+
+</body>
+</html>
